@@ -1,37 +1,7 @@
-# Cvičenie 1 – Analýza predajov videohier
-
-Skript [cviko1.py](cviko1.py) analyzuje dataset [vgsales.csv](vgsales.csv), ktorý obsahuje predaje videohier (v miliónoch kusov) podľa regiónov. Dôležité stĺpce:
-
-| Stĺpec      | Význam                              |
-|-------------|-------------------------------------|
-| `Name`      | názov hry                           |
-| `Year`      | rok vydania                         |
-| `Genre`     | žáner hry                           |
-| `NA_Sales`  | predaje v Severnej Amerike (mil.)   |
-| `EU_Sales`  | predaje v Európe (mil.)             |
-
-## Spustenie
-
-```bash
-pip install pandas matplotlib numpy
-python3 cviko1.py
-```
-
-Skript vypíše výsledky do terminálu a na konci (`plt.show()`) otvorí okná s grafmi.
-
-Na začiatku sa načítajú knižnice a dataset:
-
-```python
-df = pd.read_csv("vgsales.csv")
-```
-
-Celý dataset je potom uložený v DataFrame `df`.
-
----
 
 ## Úloha 1 – Početnosť žánrov v 90. rokoch
 
-**Cieľ:** zistiť, koľko hier jednotlivých žánrov vyšlo v rokoch 1990–1999, a zobraziť to v stĺpcovom grafe.
+**Zadanie** Zobrazte graf s četnostmi žánrů her mezi lety 1990 (včetně) a 2000 (vyjma).
 
 ```python
 dfs_90s = df[(df['Year'] >= 1990) & (df['Year'] < 2000)]
@@ -42,11 +12,13 @@ genre_counts = dfs_90s['Genre'].value_counts()
 2. **Počítanie:** `value_counts()` spočíta, koľkokrát sa každý žáner v stĺpci `Genre` vyskytuje. Výsledok je zoradený od najčastejšieho žánru.
 3. **Graf:** `genre_counts.plot(kind='bar', ...)` vykreslí stĺpcový graf. Popisky osi X sú otočené o 45°, aby sa neprekrývali, a `tight_layout()` upraví okraje tak, aby sa popisky zmestili.
 
+![Graf – početnosť žánrov v 90. rokoch](uloha1.png)
+
 ---
 
 ## Úloha 2 – Korelácia predajov v Severnej Amerike a Európe
 
-**Cieľ:** vypočítať, ako silno spolu súvisia predaje v Severnej Amerike (`NA_Sales`) a v Európe (`EU_Sales`).
+**Zadanie:** Najděte korelační koeficient mezi prodeji v NA a EU. Hodnota: 0.767727
 
 ```python
 corr = df["NA_Sales"].corr(df["EU_Sales"])
@@ -64,7 +36,7 @@ Korelácia sa počíta dvoma spôsobmi, aby sa dali výsledky porovnať:
 
 ## Úloha 3 – Vývoj korelácie podľa rokov
 
-**Cieľ:** zistiť, ako sa korelácia medzi predajmi v Severnej Amerike a Európe menila v jednotlivých rokoch 1985–2009.
+**Zadanie:** Zobrazte v grafu korelační koeficient (NA vs. EU) v jednotlivých letech od roku 1985 po rok 2010.
 
 ```python
 df_years = df[(df['Year'] >= 1985) & (df['Year'] < 2010)]
@@ -79,11 +51,13 @@ yearly_corr = df_years.groupby('Year').apply(
 3. **Výpočet pre každú skupinu:** `apply` s funkciou `lambda` spočíta koreláciu `NA_Sales` a `EU_Sales` zvlášť pre každý rok. Výsledkom je Series, kde index je rok a hodnota je korelácia.
 4. **Graf:** čiarový graf s bodmi (`marker='o'`) ukazuje, ako sa korelácia v čase mení. Mriežka (`grid`) uľahčuje odčítanie hodnôt.
 
+![Graf – vývoj korelácie NA vs. EU podľa rokov](uloha3.png)
+
 ---
 
 ## Úloha 4 – Rozdiel predajov športových hier (NA − EU)
 
-**Cieľ:** pre hry žánru *Sports* vypočítať rozdiel medzi predajmi v Severnej Amerike a v Európe a popísať ho základnými štatistikami.
+**Zadanie:** Jaké jsou základní statistické údaje rozdílu v prodejích NA a EU pro žánr "Sports", u minima a maxima zjistěte o jaké hry se jedná - minimum (-4.95, FIFA 16), maximum (12.47, Wii Sports), průměr (0.130648), směrodatná odchylka (0.548157).
 
 ```python
 sports = df[df['Genre'] == 'Sports'].copy()
@@ -112,4 +86,61 @@ sports['Diff'] = sports['NA_Sales'] - sports['EU_Sales']
 
 ## Úloha 5 (5.1, 5.2, 5.3)
 
-Zatiaľ nie je vypracovaná; v skripte sú pripravené iba prázdne sekcie.
+### 5.1 – Top 10 vydavateľov (2000–2009)
+
+**Zadanie:** Zobrazte graf 10 vydavatelů s nejvíce vydanými hrami mezi lety 2000 (včetně) a 2010 (vyjma).
+
+![Graf – top 10 vydavateľov](uloha5_1.png)
+
+### 5.2 – Korelácia predajov NA a JP podľa žánru
+
+**Zadanie:** Zobrazte v grafu korelační koeficient mezi prodeji v NA a JP pro jednotlivé žánry.
+
+![Graf – korelácia NA vs. JP podľa žánru](uloha5_2.png)
+
+### 5.3 – Rozdiel predajov RPG hier (JP − NA)
+
+**Zadanie:** Jaké jsou základní statistické údaje rozdílu v prodejích JP a NA pro žánr "Role-Playing"? U minima a maxima zjistěte, o jaké hry se jedná.
+
+```python
+rpg = df[df['Genre'] == 'Role-Playing'].copy()
+rpg['Diff'] = rpg['JP_Sales'] - rpg['NA_Sales']
+```
+
+1. **Filtrovanie:** vyberieme iba hry žánru *Role-Playing*, opäť s `.copy()`, rovnako ako v úlohe 4.
+2. **Nový stĺpec `Diff`:** kladná hodnota znamená, že hra sa viac predávala v Japonsku, záporná znamená, že sa viac predávala v Severnej Amerike.
+3. **Základné štatistiky:** `describe()` vypíše počet, priemer, smerodajnú odchýlku, minimum, kvartily a maximum.
+4. **Extrémy:** `idxmin()` a `idxmax()` nájdu riadky s najmenším a najväčším rozdielom a cez `loc` z nich vytiahneme názov hry a rok.
+
+**Výstup v konzole:**
+
+```text
+Uloha 5.3
+count    1488.000000
+mean        0.016821
+std         0.564996
+min        -4.930000
+25%        -0.080000
+50%         0.010000
+75%         0.100000
+max         4.870000
+Name: Diff, dtype: float64
+
+ Minimum: -4.930000000000001, Hra: The Elder Scrolls V: Skyrim, Rok: 2011
+Maximum: 4.87, Hra: Monster Hunter Freedom 3, Rok: 2010
+
+ Průměrný rozdíl: 0.017
+Směrodatná odchylka rozdílu: 0.565
+```
+
+**Výsledky:**
+
+| Ukazovateľ             | Hodnota                                          |
+|------------------------|--------------------------------------------------|
+| Počet RPG hier         | 1 488                                            |
+| Priemerný rozdiel      | 0,017 mil.                                       |
+| Smerodajná odchýlka    | 0,565 mil.                                       |
+| Minimum                | −4,93 mil. – *The Elder Scrolls V: Skyrim* (2011) |
+| Maximum                | 4,87 mil. – *Monster Hunter Freedom 3* (2010)    |
+
+Priemerný rozdiel je takmer nulový, takže RPG hry sa v Japonsku a v Severnej Amerike predávajú v priemere podobne. Extrémy sú však veľké: západné RPG ako *Skyrim* sa predávajú hlavne v Severnej Amerike, kým japonské tituly ako *Monster Hunter* dominujú v Japonsku.
